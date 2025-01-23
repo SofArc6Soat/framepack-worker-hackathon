@@ -57,7 +57,7 @@ namespace Worker
                 .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder().WithDefaultDestructurers().WithDestructurers([new DbUpdateExceptionDestructurer()]))
                 .Enrich.WithCorrelationId()
                 .Enrich.WithCorrelationIdHeader()
-                .MinimumLevel.Information()
+                .MinimumLevel.Debug()
                 .WriteTo.Async(wt => wt.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"));
 
             Log.Logger = loggerConfiguration.CreateLogger();

@@ -32,12 +32,11 @@ namespace Infra.Configurations
             return amazonDynamoDbClient;
         }
 
-        public static async Task CreateTableIfNotExists(IAmazonDynamoDB client)
+        private static async Task CreateTableIfNotExists(IAmazonDynamoDB client)
         {
             var listTable = new List<string>
                     {
-                        "Pagamentos",
-                        "Pedidos"
+                        "Conversoes"
                     };
 
             foreach (var tableName in listTable)

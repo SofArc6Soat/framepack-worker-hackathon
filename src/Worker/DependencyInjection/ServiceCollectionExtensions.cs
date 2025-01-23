@@ -1,9 +1,9 @@
 ﻿using Amazon.SQS;
 using Core.Infra.MessageBroker;
 using Core.Infra.MessageBroker.DependencyInjection;
+using Gateways.Dtos.Events;
 using System.Diagnostics.CodeAnalysis;
 using Worker.BackgroundServices;
-using Worker.Dtos.Events;
 
 namespace Worker.DependencyInjection
 {
@@ -15,15 +15,15 @@ namespace Worker.DependencyInjection
             // AWS SQS
             services.AddAwsSqsMessageBroker();
 
-            services.AddSingleton<ISqsService<PedidoCriadoEvent>>(provider => new SqsService<PedidoCriadoEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueuePedidoCriadoEvent));
+            services.AddSingleton<ISqsService<ConversaoSolicitadaEvent>>(provider => new SqsService<ConversaoSolicitadaEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueConversaoSolicitadaEvent));
 
-            services.AddHostedService<PedidoCriadoBackgroundService>();
+            services.AddHostedService<ConversaoSolicitadaBackgroundService>();
         }
     }
 
     [ExcludeFromCodeCoverage]
     public record WorkerQueues
     {
-        public string QueuePedidoCriadoEvent { get; set; } = string.Empty;
+        public string QueueConversaoSolicitadaEvent { get; set; } = string.Empty;
     }
 }

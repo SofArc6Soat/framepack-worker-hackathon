@@ -12,20 +12,17 @@ namespace Gateways.DependencyInjection
     {
         public static void AddGatewayDependencyServices(this IServiceCollection services, string dynamoDbServiceUrl, string dynamoDbAccessKey, string dynamoDbSecretKey, Queues queues)
         {
-            services.AddScoped<IPagamentoGateway, PagamentoGateway>();
-            services.AddScoped<IPedidoGateway, PedidoGateway>();
+            services.AddScoped<IConversaoGateway, ConversaoGateway>();
 
             services.AddInfraDependencyServices(dynamoDbServiceUrl, dynamoDbAccessKey, dynamoDbSecretKey);
 
-            services.AddSingleton<ISqsService<PedidoPagoEvent>>(provider => new SqsService<PedidoPagoEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueuePedidoPagoEvent));
-            services.AddSingleton<ISqsService<PedidoPendentePagamentoEvent>>(provider => new SqsService<PedidoPendentePagamentoEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueuePedidoPendentePagamentoEvent));
+            services.AddSingleton<ISqsService<ConversaoSolicitadaEvent>>(provider => new SqsService<ConversaoSolicitadaEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueConversaoSolicitadaEvent));
         }
 
         [ExcludeFromCodeCoverage]
         public record Queues
         {
-            public string QueuePedidoPagoEvent { get; set; } = string.Empty;
-            public string QueuePedidoPendentePagamentoEvent { get; set; } = string.Empty;
+            public string QueueConversaoSolicitadaEvent { get; set; } = string.Empty;
         }
     }
 }

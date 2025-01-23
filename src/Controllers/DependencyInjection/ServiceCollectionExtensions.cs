@@ -9,7 +9,7 @@ namespace Controllers.DependencyInjection
     {
         public static void AddControllerDependencyServices(this IServiceCollection services)
         {
-            services.AddScoped<IPagamentoController, PagamentoController>();
+            services.AddScoped<IConversaoController, ConversaoController>();
 
             services.AddUseCasesDependencyServices();
         }

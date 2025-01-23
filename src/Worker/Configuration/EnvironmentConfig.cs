@@ -33,8 +33,6 @@ namespace Worker.Configuration
     [ExcludeFromCodeCoverage]
     public record AwsSqsSettings
     {
-        public string QueuePedidoCriadoEvent { get; set; } = string.Empty;
-        public string QueuePedidoPagoEvent { get; set; } = string.Empty;
-        public string QueuePedidoPendentePagamentoEvent { get; set; } = string.Empty;
+        public string QueueConversaoSolicitadaEvent { get; set; } = string.Empty;
     }
 }

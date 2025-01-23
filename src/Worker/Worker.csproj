@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageReference Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
@@ -20,7 +19,9 @@
   <ItemGroup>
     <ProjectReference Include="..\BuildingBlocks\Core.Infra.MessageBroker\Core.Infra.MessageBroker.csproj" />
     <ProjectReference Include="..\BuildingBlocks\Core.WebApi\Core.WebApi.csproj" />
+    <ProjectReference Include="..\Controllers\Controllers.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Gateways\Gateways.csproj" />
     <ProjectReference Include="..\Infra\Infra.csproj" />
   </ItemGroup>
 

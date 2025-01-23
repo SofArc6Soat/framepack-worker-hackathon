@@ -1,6 +1,10 @@
-﻿using Core.WebApi.DependencyInjection;
+﻿using Controllers.DependencyInjection;
+using Core.WebApi.DependencyInjection;
+using Gateways.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 using Worker.Configuration;
+using Worker.DependencyInjection;
+using static Gateways.DependencyInjection.ServiceCollectionExtensions;
 
 namespace Worker
 {
@@ -30,22 +34,22 @@ namespace Worker
 
             services.AddHealthCheckConfig();
 
-            //services.AddControllerDependencyServices();
+            services.AddControllerDependencyServices();
 
-            //var queues = new Queues
-            //{
-            //    QueuePedidoPagoEvent = settings.AwsSqsSettings.QueuePedidoPagoEvent,
-            //    QueuePedidoPendentePagamentoEvent = settings.AwsSqsSettings.QueuePedidoPendentePagamentoEvent
-            //};
+            // TODO: Evento que produzirá
+            var queues = new Queues
+            {
+                QueueConversaoSolicitadaEvent = settings.AwsSqsSettings.QueueConversaoSolicitadaEvent
+            };
 
-            //services.AddGatewayDependencyServices(settings.AwsDynamoDbSettings.ServiceUrl, settings.AwsDynamoDbSettings.AccessKey, settings.AwsDynamoDbSettings.SecretKey, queues);
+            services.AddGatewayDependencyServices(settings.AwsDynamoDbSettings.ServiceUrl, settings.AwsDynamoDbSettings.AccessKey, settings.AwsDynamoDbSettings.SecretKey, queues);
 
-            //var workerQueues = new WorkerQueues
-            //{
-            //    QueuePedidoCriadoEvent = settings.AwsSqsSettings.QueuePedidoCriadoEvent
-            //};
+            var workerQueues = new WorkerQueues
+            {
+                QueueConversaoSolicitadaEvent = settings.AwsSqsSettings.QueueConversaoSolicitadaEvent
+            };
 
-            //services.AddWorkerDependencyServices(workerQueues);
+            services.AddWorkerDependencyServices(workerQueues);
         }
 
         public static void Configure(IApplicationBuilder app) =>
