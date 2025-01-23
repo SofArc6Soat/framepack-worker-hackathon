@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quickfood-sqlserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quickfood-sqlserver
+  template:
+    metadata:
+      labels:
+        app: quickfood-sqlserver
+    spec:
+      containers:
+      - name: quickfood-sqlserver
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        ports:
+        - containerPort: 1433
+        env:
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: SA_PASSWORD
+          value: "quickfood-backend#2024"
+        - name: MSSQL_DATA_DIR
+          value: /var/opt/mssql/data
+        - name: MSSQL_PID
+          value: 'Developer'
+        - name: MSSQL_TCP_PORT
+          value: "1433"
+        volumeMounts:
+        - name: sql-data
+          mountPath: /var/opt/mssql/data
+        - name: sql-log
+          mountPath: /var/opt/mssql/log
+        - name: sql-secrets
+          mountPath: /var/opt/mssql/secrets
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'quickfood-backend#2024' -C -Q 'SELECT 1' || exit 1
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: sql-data
+        persistentVolumeClaim:
+          claimName: sql-data-pvc
+      - name: sql-log
+        persistentVolumeClaim:
+          claimName: sql-log-pvc
+      - name: sql-secrets
+        persistentVolumeClaim:
+          claimName: sql-secrets-pvc
