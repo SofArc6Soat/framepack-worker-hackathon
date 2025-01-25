@@ -5,6 +5,7 @@
         AguardandoConversao,
         Processando,
         Compactando,
-        Concluido
+        Concluido,
+        Erro
     }
 }
