@@ -29,22 +29,48 @@ namespace Gateways
 
         public async Task<bool> EfetuarConversaoAsync(Conversao conversao, CancellationToken cancellationToken)
         {
-            // TODO: Salvar no BD e alterar o status
+            if (conversao.AlterarStatusParaProcessando(conversao.Status))
+            {
+                await repository.SaveAsync(EntityToDb(conversao), cancellationToken);
 
-            Directory.CreateDirectory(LocalProcessamentoPath);
-            Directory.CreateDirectory(LocalSaidaPath);
+                Directory.CreateDirectory(LocalProcessamentoPath);
+                Directory.CreateDirectory(LocalSaidaPath);
 
-            var arquivoVideoPath = await EfetuarDownloadVideoAsync(conversao.Id, conversao.UrlArquivoVideo);
+                var arquivoVideoPath = await EfetuarDownloadVideoAsync(conversao.Id, conversao.UrlArquivoVideo);
 
-            var framesPath = await ExtrairFramesAsync(conversao.Id, arquivoVideoPath);
+                var framesPath = await ExtrairFramesAsync(conversao.Id, arquivoVideoPath);
 
-            var urlArquivoCompactado = await CompactarFramesAsync(conversao.Id, s3Service, arquivoVideoPath, framesPath);
+                if (conversao.AlterarStatusParaCompactando(conversao.Status))
+                {
+                    await repository.SaveAsync(EntityToDb(conversao), cancellationToken);
 
-            conversao.SetUrlArquivoCompactado(urlArquivoCompactado);
+                    var urlArquivoCompactado = await CompactarFramesAsync(conversao.Id, s3Service, arquivoVideoPath, framesPath);
 
-            // TODO: Salvar no BD e alterar o status
+                    if (!string.IsNullOrEmpty(urlArquivoCompactado))
+                    {
+                        conversao.AlterarStatusParaConcluido(conversao.Status);
+                        conversao.SetUrlArquivoCompactado(urlArquivoCompactado);
 
-            return true;
+                        await repository.SaveAsync(EntityToDb(conversao), cancellationToken);
+
+                        return true;
+                    }
+
+                    await ConversaoComErro(repository, conversao, cancellationToken);
+
+                    return false;
+                }
+            }
+
+            await ConversaoComErro(repository, conversao, cancellationToken);
+
+            return false;
+        }
+
+        private static async Task ConversaoComErro(IDynamoDBContext repository, Conversao conversao, CancellationToken cancellationToken)
+        {
+            conversao.AlterarStatusParaErro();
+            await repository.SaveAsync(EntityToDb(conversao), cancellationToken);
         }
 
         private static async Task<string> CompactarFramesAsync(Guid id, S3Service s3Service, string arquivoVideoPath, string framesPath)
@@ -114,5 +140,16 @@ namespace Gateways
                 throw;
             }
         }
+
+        private static ConversaoDb EntityToDb(Conversao conversao) => new()
+        {
+            Id = conversao.Id,
+            UsuarioId = conversao.UsuarioId,
+            Status = conversao.Status.ToString(),
+            Data = conversao.Data,
+            NomeArquivo = conversao.NomeArquivo,
+            UrlArquivoVideo = conversao.UrlArquivoVideo,
+            UrlArquivoCompactado = conversao.UrlArquivoCompactado
+        };
     }
 }

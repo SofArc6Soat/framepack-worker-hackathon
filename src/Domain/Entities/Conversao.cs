@@ -25,5 +25,41 @@ namespace Domain.Entities
 
         public void SetUrlArquivoCompactado(string urlArquivoCompactado) =>
             UrlArquivoCompactado = urlArquivoCompactado;
+
+        public bool AlterarStatusParaProcessando(Status statusAtual)
+        {
+            if (statusAtual == Status.AguardandoConversao)
+            {
+                Status = Status.Processando;
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool AlterarStatusParaCompactando(Status statusAtual)
+        {
+            if (statusAtual == Status.Processando)
+            {
+                Status = Status.Compactando;
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool AlterarStatusParaConcluido(Status statusAtual)
+        {
+            if (statusAtual == Status.Compactando)
+            {
+                Status = Status.Concluido;
+                return true;
+            }
+
+            return false;
+        }
+
+        public void AlterarStatusParaErro() =>
+            Status = Status.Erro;
     }
 }
