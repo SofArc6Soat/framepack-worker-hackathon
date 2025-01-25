@@ -398,5 +398,3 @@ FodyWeavers.xsd
 *.sln.iml
 
 # Outros
-ffmpeg.exe
-ffprobe.exe
