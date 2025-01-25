@@ -38,7 +38,7 @@ namespace Gateways
 
             var framesPath = await ExtrairFramesAsync(conversao.Id, arquivoVideoPath);
 
-            var urlArquivoCompactado = await CompactaFrames(conversao.Id, s3Service, arquivoVideoPath, framesPath);
+            var urlArquivoCompactado = await CompactarFramesAsync(conversao.Id, s3Service, arquivoVideoPath, framesPath);
 
             conversao.SetUrlArquivoCompactado(urlArquivoCompactado);
 
@@ -47,7 +47,7 @@ namespace Gateways
             return true;
         }
 
-        private static async Task<string> CompactaFrames(Guid id, S3Service s3Service, string arquivoVideoPath, string framesPath)
+        private static async Task<string> CompactarFramesAsync(Guid id, S3Service s3Service, string arquivoVideoPath, string framesPath)
         {
             var arquivoZipPath = Path.Combine(LocalSaidaPath, $"{id}.zip");
             ZipFile.CreateFromDirectory(framesPath, arquivoZipPath);
