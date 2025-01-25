@@ -13,14 +13,10 @@ namespace UseCases
             if (conversao is null)
             {
                 // TODO: Gerar evento de erro
+                return false;
             }
 
-            // Fazer download
-            // Converter
-            // Compactar
-            // Fazer upload
-
-            return false;
+            return await conversaoGateway.EfetuarConversaoAsync(conversao, cancellationToken);
         }
     }
 }

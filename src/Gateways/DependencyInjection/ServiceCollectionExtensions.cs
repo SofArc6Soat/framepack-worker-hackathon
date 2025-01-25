@@ -1,5 +1,6 @@
 ﻿using Amazon.SQS;
 using Core.Infra.MessageBroker;
+using Core.Infra.S3.DependencyInjection;
 using Gateways.Dtos.Events;
 using Infra.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,8 @@ namespace Gateways.DependencyInjection
         public static void AddGatewayDependencyServices(this IServiceCollection services, string dynamoDbServiceUrl, string dynamoDbAccessKey, string dynamoDbSecretKey, Queues queues)
         {
             services.AddScoped<IConversaoGateway, ConversaoGateway>();
+
+            services.AddAwsS3();
 
             services.AddInfraDependencyServices(dynamoDbServiceUrl, dynamoDbAccessKey, dynamoDbSecretKey);
 
