@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Core.Infra.S3
 {
-    public class S3Service(IAmazonS3 s3Client)
+    public class S3Service(IAmazonS3 s3Client) : IS3Service
     {
         private const string BucketName = "amzn-s3-bucket-26bda3ac-c185-4185-a9f8-d3697a89754c-framepack";
 
