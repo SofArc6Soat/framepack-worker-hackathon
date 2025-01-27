@@ -87,7 +87,6 @@ namespace Core.Infra.S3
                 };
 
                 await s3Client.DeleteObjectAsync(deleteObjectRequest);
-                Console.WriteLine($"Arquivo deletado com sucesso.");
             }
             catch (AmazonS3Exception ex)
             {
