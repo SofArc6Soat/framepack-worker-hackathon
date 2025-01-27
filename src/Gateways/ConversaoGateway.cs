@@ -8,7 +8,7 @@ using Xabe.FFmpeg;
 
 namespace Gateways
 {
-    public class ConversaoGateway(IDynamoDBContext repository, S3Service s3Service) : IConversaoGateway
+    public class ConversaoGateway(IDynamoDBContext repository, IS3Service s3Service) : IConversaoGateway
     {
         private static readonly string LocalProcessamentoPath = Path.Combine(Path.GetTempPath(), "video-processing");
         private static readonly string LocalSaidaPath = Path.Combine(Path.GetTempPath(), "video-output");
@@ -36,7 +36,7 @@ namespace Gateways
                 Directory.CreateDirectory(LocalProcessamentoPath);
                 Directory.CreateDirectory(LocalSaidaPath);
 
-                var arquivoVideoPath = await EfetuarDownloadVideoAsync(conversao.Id, conversao.UrlArquivoVideo);
+                var arquivoVideoPath = await EfetuarDownloadVideoAsync(conversao.Id, conversao.UrlArquivoVideo, s3Service);
 
                 var framesPath = await ExtrairFramesAsync(conversao.Id, arquivoVideoPath);
 
@@ -73,7 +73,7 @@ namespace Gateways
             await repository.SaveAsync(EntityToDb(conversao), cancellationToken);
         }
 
-        private static async Task<string> CompactarFramesAsync(Guid id, S3Service s3Service, string arquivoVideoPath, string framesPath)
+        private static async Task<string> CompactarFramesAsync(Guid id, IS3Service s3Service, string arquivoVideoPath, string framesPath)
         {
             var arquivoZipPath = Path.Combine(LocalSaidaPath, $"{id}.zip");
             ZipFile.CreateFromDirectory(framesPath, arquivoZipPath);
@@ -115,21 +115,23 @@ namespace Gateways
             return framesPath;
         }
 
-        private static async Task<string> EfetuarDownloadVideoAsync(Guid id, string urlArquivoVideo)
+        private static async Task<string> EfetuarDownloadVideoAsync(Guid id, string urlArquivoVideo, IS3Service s3Service)
         {
             var videoPath = Path.Combine(LocalProcessamentoPath, $"{id}.mp4");
 
             using var httpClient = new HttpClient();
 
+            var url = s3Service.GerarPreSignedUrl(urlArquivoVideo);
+
             try
             {
-                var response = await httpClient.GetAsync(urlArquivoVideo);
+                var response = await httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new HttpRequestException($"Falha ao efetuar downloado do arquivo. Status code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
                 }
 
-                var videoBytes = await httpClient.GetByteArrayAsync(urlArquivoVideo);
+                var videoBytes = await httpClient.GetByteArrayAsync(url);
                 await File.WriteAllBytesAsync(videoPath, videoBytes);
 
                 return videoPath;

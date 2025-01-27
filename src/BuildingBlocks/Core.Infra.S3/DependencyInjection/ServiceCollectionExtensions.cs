@@ -10,7 +10,7 @@ namespace Core.Infra.S3.DependencyInjection
         public static void AddAwsS3(this IServiceCollection services)
         {
             services.AddAWSService<IAmazonS3>();
-            services.AddSingleton<S3Service>();
+            services.AddScoped<IS3Service, S3Service>();
         }
     }
 }
