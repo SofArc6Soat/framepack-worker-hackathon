@@ -12,8 +12,7 @@ namespace UseCases
 
             if (conversao is null)
             {
-                // TODO: Gerar evento de erro
-                return false;
+                throw new KeyNotFoundException("Conversão não encontrada");
             }
 
             return await conversaoGateway.EfetuarConversaoAsync(conversao, cancellationToken);
