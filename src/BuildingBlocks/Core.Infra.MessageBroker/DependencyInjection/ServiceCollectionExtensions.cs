@@ -8,6 +8,11 @@ namespace Core.Infra.MessageBroker.DependencyInjection
     {
         public static void AddAwsSqsMessageBroker(this IServiceCollection services)
         {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
             var awsOptions = new AWSOptions
             {
                 Profile = "default",
@@ -15,7 +20,6 @@ namespace Core.Infra.MessageBroker.DependencyInjection
             };
 
             services.AddDefaultAWSOptions(awsOptions);
-
             services.AddAWSService<IAmazonSQS>();
         }
     }

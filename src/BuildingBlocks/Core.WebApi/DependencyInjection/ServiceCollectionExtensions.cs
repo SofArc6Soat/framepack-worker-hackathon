@@ -10,100 +10,99 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Core.WebApi.DependencyInjection
+namespace Core.WebApi.DependencyInjection;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static void AddApiDefautConfig(this IServiceCollection services, JwtBearerConfigureOptions jwtBearerConfigureOptions)
     {
-        public static void AddApiDefautConfig(this IServiceCollection services, JwtBearerConfigureOptions jwtBearerConfigureOptions)
+        services.AddScoped<INotificador, Notificador>();
+
+        services.AddControllers().AddJsonOptions(delegate (JsonOptions options)
         {
-            services.AddScoped<INotificador, Notificador>();
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 
-            services.AddControllers().AddJsonOptions(delegate (JsonOptions options)
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+        });
+
+        services.AddSwaggerConfig();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(opt =>
             {
-                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-
-                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-
-            });
-
-            services.AddSwaggerConfig();
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(opt =>
+                opt.Authority = jwtBearerConfigureOptions.Authority;
+                opt.MetadataAddress = jwtBearerConfigureOptions.MetadataAddress;
+                opt.IncludeErrorDetails = true;
+                opt.RequireHttpsMetadata = false;
+                opt.TokenValidationParameters = new TokenValidationParameters
                 {
-                    opt.Authority = jwtBearerConfigureOptions.Authority;
-                    opt.MetadataAddress = jwtBearerConfigureOptions.MetadataAddress;
-                    opt.IncludeErrorDetails = true;
-                    opt.RequireHttpsMetadata = false;
-                    opt.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = false,
-                        ValidateIssuerSigningKey = true,
-                        RoleClaimType = "cognito:groups"
-                    };
-                });
-
-            services.AddAuthorizationBuilder()
-                // Política para usuários no grupo "admin"
-                .AddPolicy("AdminRole", policy => policy.RequireRole("admin"))
-                // Política para usuários no grupo "cliente"
-                .AddPolicy("ClienteRole", policy => policy.RequireRole("cliente"))
-                // Política para usuários que pertencem a "admin" ou "cliente"
-                .AddPolicy("AdminOrClienteRole", policy => policy.RequireRole("admin", "cliente"));
-
-            services.AddAWSService<IAmazonCognitoIdentityProvider>();
-        }
-
-        public static void AddWorkerDefautConfig(this IServiceCollection services)
-        {
-            services.AddScoped<INotificador, Notificador>();
-
-            services.AddControllers().AddJsonOptions(delegate (JsonOptions options)
-            {
-                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-
-                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-
+                    ValidateIssuer = true,
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    RoleClaimType = "cognito:groups"
+                };
             });
-        }
 
-        public static void UseApiDefautConfig(this IApplicationBuilder app)
+        services.AddAuthorizationBuilder()
+            // Política para usuários no grupo "admin"
+            .AddPolicy("AdminRole", policy => policy.RequireRole("admin"))
+            // Política para usuários no grupo "cliente"
+            .AddPolicy("ClienteRole", policy => policy.RequireRole("cliente"))
+            // Política para usuários que pertencem a "admin" ou "cliente"
+            .AddPolicy("AdminOrClienteRole", policy => policy.RequireRole("admin", "cliente"));
+
+        services.AddAWSService<IAmazonCognitoIdentityProvider>();
+    }
+
+    public static void AddWorkerDefautConfig(this IServiceCollection services)
+    {
+        services.AddScoped<INotificador, Notificador>();
+
+        services.AddControllers().AddJsonOptions(delegate (JsonOptions options)
         {
-            app.UseApplicationErrorMiddleware();
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 
-            app.UseSwaggerConfig();
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 
-            app.UseHsts();
-            app.UseHttpsRedirection();
+        });
+    }
 
-            app.UseRouting();
+    public static void UseApiDefautConfig(this IApplicationBuilder app)
+    {
+        app.UseApplicationErrorMiddleware();
 
-            app.UseAuthentication();
+        app.UseSwaggerConfig();
 
-            app.UseAuthorization();
+        app.UseHsts();
+        app.UseHttpsRedirection();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health");
-            });
-        }
+        app.UseRouting();
 
-        public static void UseWorkerDefautConfig(this IApplicationBuilder app)
+        app.UseAuthentication();
+
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
         {
-            app.UseApplicationErrorMiddleware();
+            endpoints.MapControllers();
+            endpoints.MapHealthChecks("/health");
+        });
+    }
 
-            app.UseHsts();
-            app.UseHttpsRedirection();
+    public static void UseWorkerDefautConfig(this IApplicationBuilder app)
+    {
+        app.UseApplicationErrorMiddleware();
 
-            app.UseRouting();
+        app.UseHsts();
+        app.UseHttpsRedirection();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health");
-            });
-        }
+        app.UseRouting();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+            endpoints.MapHealthChecks("/health");
+        });
     }
 }
