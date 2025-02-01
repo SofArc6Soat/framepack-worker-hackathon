@@ -1,8 +1,19 @@
-﻿namespace Core.WebApi.Configurations
+﻿namespace Core.WebApi.Configurations;
+
+public class JwtBearerConfigureOptions
 {
-    public class JwtBearerConfigureOptions
+    private string _authority = string.Empty;
+    private string _metadataAddress = string.Empty;
+
+    public string Authority
     {
-        public string Authority { get; set; } = string.Empty;
-        public string MetadataAddress { get; set; } = string.Empty;
+        get => _authority;
+        set => _authority = value ?? throw new ArgumentNullException(nameof(Authority));
+    }
+
+    public string MetadataAddress
+    {
+        get => _metadataAddress;
+        set => _metadataAddress = value ?? throw new ArgumentNullException(nameof(MetadataAddress));
     }
 }
