@@ -16,6 +16,13 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v3
 
+      # Set UTF-8 encoding
+      - name: Set encoding to UTF-8
+        run: |
+          export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+          export LANG=en_US.UTF-8
+          export LC_ALL=en_US.UTF-8
+
       # Setup .NET Core SDK
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
@@ -24,28 +31,23 @@ jobs:
 
       # Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore QuickFood-Pagamento.sln
+        run: dotnet restore ./Framepack-Worker.csproj
 
-      # Install missing package in all relevant projects
-      - name: Install AWSSDK.Core in Api project
-        run: dotnet add src/Api/Api.csproj package AWSSDK.Core --version 3.7.403.8
+      # Run unit tests with coverage
+      - name: Run all tests with coverage
+        run: |
+          dotnet test Framepack-Worker.csproj \
+          --configuration Release \
+          --collect:"XPlat Code Coverage" \
+          --results-directory tests/TestResults \
+          --logger:"trx;LogFileName=TestResults.trx" \
+          --diag:log-detailed.txt \
+          -- RunConfiguration.DisableAppDomain=true
 
-      - name: Install AWSSDK.Core in Gateways.Tests project
-        run: dotnet add tests/Gateways.Tests/Gateways.Tests.csproj package AWSSDK.Core --version 3.7.403.8
-
-      - name: Install AWSSDK.Core in Infra project
-        run: dotnet add src/Infra/Infra.csproj package AWSSDK.Core --version 3.7.403.8
-
-      - name: Install AWSSDK.Core in Core.Infra.MessageBroker project
-        run: dotnet add src/BuildingBlocks/Core.Infra.MessageBroker/Core.Infra.MessageBroker.csproj package AWSSDK.Core --version 3.7.403.8
-
-      # Run unit tests
-      - name: Run all tests
-        run: dotnet test QuickFood-Pagamento.sln --configuration Release --collect:"XPlat Code Coverage"
-
-      # Check for nullability warnings
-      - name: Check for nullability warnings
-        run: dotnet build --configuration Release /warnaserror:nullable
+      # Display detailed logs if tests fail
+      - name: Display test logs
+        if: failure()
+        run: cat log-detailed.txt | iconv -f utf-8 -t utf-8
 
   code_analysis:
     runs-on: ubuntu-latest
@@ -60,11 +62,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # 3. Restauração das dependências
-      - name: Restore dependencies
-        run: dotnet restore src/Api/Api.csproj
-
-      # 4. Cache do SonarCloud
+      # 3. Cache do SonarCloud
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
@@ -72,7 +70,7 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      # 5. Cache do SonarCloud Scanner
+      # 4. Cache do SonarCloud Scanner
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
         uses: actions/cache@v3
@@ -81,47 +79,43 @@ jobs:
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
 
-      # 6. Instalação do SonarCloud Scanner
+      # 5. Instalação do SonarCloud Scanner
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
           dotnet tool install --global dotnet-sonarscanner
-          echo "{DOTNET_ROOT}/tools" >> $GITHUB_PATH
+          echo "${DOTNET_ROOT}/tools" >> $GITHUB_PATH
 
-      # 7. Instalação do ReportGenerator
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      # 6. Instalação do dotnet-coverage
+      - name: Install dotnet-coverage
+        run: |
+          dotnet tool install --global dotnet-coverage
 
-      # 8. Configuração e análise com o SonarScanner
+      # 7. Configuração e análise com o SonarScanner
       - name: Build and analyze with SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN_GIT }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          # Iniciar o scanner do SonarCloud
           dotnet-sonarscanner begin \
-            /k:"SofArc6Soat_quickfood-backend-pagamento" \
+            /k:"SofArc6Soat_framepack-api-hackathon" \
             /o:"sofarc6soat" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.verbose=true \
-            /d:sonar.cs.vstest.reportsPaths="tests/**/TestResults/*.trx" \
-            /d:sonar.cs.opencover.reportsPaths="tests/**/TestResults/*/coverage.cobertura.xml"
+            /d:sonar.cs.vscoveragexml.reportsPaths="tests/Worker.Tests/TestResults/**/coverage.cobertura.xml" \
+            /d:sonar.inclusions="**/*.cs" \
+            /d:sonar.coverage.exclusions="**/Program.cs,**/Startup.cs" \
+            /d:sonar.verbose=true
 
-          dotnet build QuickFood-Pagamento.sln --configuration Release
-          dotnet test QuickFood-Pagamento.sln --configuration Release --collect:"XPlat Code Coverage"
+          # Build da solução
+          dotnet build ./Framepack-Worker.csproj --configuration Release
 
-          reportgenerator -reports:tests/**/TestResults/*/coverage.cobertura.xml \
-                          -targetdir:coverage-report \
-                          -reporttypes:Html
+          # Execução dos testes com coleta de cobertura
+          dotnet test ./Framepack-Worker.csproj --configuration Release --no-build --collect:"XPlat Code Coverage"
 
+          # Finalizando a análise no SonarCloud
           dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-
-      # 9. Upload do relatório de cobertura
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: code-coverage-report
-          path: coverage-report
 
   deploy:
     runs-on: ubuntu-latest
@@ -138,7 +132,7 @@ jobs:
 
       # Build application
       - name: Build application
-        run: dotnet build src/Api/Api.csproj --configuration Release
+        run: dotnet build src/Worker/Worker.csproj --configuration Release
 
       # Deploy application
       - name: Deploy application
@@ -181,4 +175,4 @@ jobs:
 
       - name: Build and Push Docker Image
         id: build-docker-image
-        run: docker buildx build --push -t sofarc6soat/quickfood-backend-pagamento:latest -f ./src/Api/Dockerfile.publish .
+        run: docker buildx build --push -t sofarc6soat/framepack-worker:latest -f ./src/Api/Dockerfile.publish .
