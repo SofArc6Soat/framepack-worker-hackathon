@@ -10,13 +10,13 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copiar arquivos de projeto e restaurar dependências
-COPY ["src/Api/Api.csproj", "./src/Api/"]
+COPY ["src/Worker/Worker.csproj", "./src/Worker/"]
 #
-COPY ["src/Application/UseCases.csproj", "./src/UseCases/"]
+COPY ["src/UseCases/UseCases.csproj", "./src/UseCases/"]
 #
 COPY ["src/BuildingBlocks/Core.Domain/Core.Domain.csproj", "./src/Core.Domain/"]
-COPY ["src/BuildingBlocks/Core.Infra/Core.Infra.csproj", "./src/Core.Infra/"]
 COPY ["src/BuildingBlocks/Core.Infra.MessageBroker/Core.Infra.MessageBroker.csproj", "./src/Core.Infra.MessageBroker/"]
+COPY ["src/BuildingBlocks/Core.Infra.S3/Core.Infra.S3.csproj", "./src/Core.Infra.S3/"]
 COPY ["src/BuildingBlocks/Core.WebApi/Core.WebApi.csproj", "./src/Core.WebApi/"]
 #
 COPY ["src/Controllers/Controllers.csproj", "./src/Controllers/"]
@@ -27,7 +27,7 @@ COPY ["src/Gateways/Gateways.csproj", "./src/Gateways/"]
 #
 COPY ["src/Infra/Infra.csproj", "./src/Infra/"]
 
-RUN dotnet restore "src/Api/Api.csproj"
+RUN dotnet restore "src/Worker/Worker.csproj"
 
 # Instalar dotnet-ef localmente para o usuário não-root
 RUN dotnet tool install --tool-path /tools dotnet-ef
@@ -40,12 +40,12 @@ COPY . .
 
 # Definir diretório de trabalho e compilar
 WORKDIR /src
-RUN dotnet build "src/Api/Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "src/Worker/Worker.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Publicar a aplicação
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "src/Api/Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src/Worker/Worker.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Usar a imagem base e copiar os arquivos publicados
 FROM base AS final
