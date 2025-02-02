@@ -16,8 +16,10 @@ namespace Worker.DependencyInjection
             services.AddAwsSqsMessageBroker();
 
             services.AddSingleton<ISqsService<ConversaoSolicitadaEvent>>(provider => new SqsService<ConversaoSolicitadaEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueConversaoSolicitadaEvent));
+            services.AddSingleton<ISqsService<DownloadEfetuadoEvent>>(provider => new SqsService<DownloadEfetuadoEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueDownloadEfetuadoEvent));
 
             services.AddHostedService<ConversaoSolicitadaBackgroundService>();
+            services.AddHostedService<DownloadEfetuadoBackgroundService>();
         }
     }
 
@@ -25,5 +27,6 @@ namespace Worker.DependencyInjection
     public record WorkerQueues
     {
         public string QueueConversaoSolicitadaEvent { get; set; } = string.Empty;
+        public string QueueDownloadEfetuadoEvent { get; set; } = string.Empty;
     }
 }

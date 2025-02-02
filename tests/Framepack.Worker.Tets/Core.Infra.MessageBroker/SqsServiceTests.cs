@@ -61,10 +61,10 @@ public class SqsServiceTests
         var messageBody = JsonSerializer.Serialize(testObject);
         var receiveMessageResponse = new ReceiveMessageResponse
         {
-            Messages = new List<Message>
-            {
+            Messages =
+            [
                 new Message { Body = messageBody, ReceiptHandle = "receipt-handle" }
-            }
+            ]
         };
 
         _sqsClientMock.Setup(x => x.ReceiveMessageAsync(It.IsAny<ReceiveMessageRequest>(), It.IsAny<CancellationToken>()))
@@ -91,10 +91,10 @@ public class SqsServiceTests
         var invalidMessageBody = "invalid json";
         var receiveMessageResponse = new ReceiveMessageResponse
         {
-            Messages = new List<Message>
-            {
+            Messages =
+            [
                 new Message { Body = invalidMessageBody, ReceiptHandle = "receipt-handle" }
-            }
+            ]
         };
 
         _sqsClientMock.Setup(x => x.ReceiveMessageAsync(It.IsAny<ReceiveMessageRequest>(), It.IsAny<CancellationToken>()))

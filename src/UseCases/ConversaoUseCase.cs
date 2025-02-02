@@ -10,12 +10,18 @@ namespace UseCases
         {
             var conversao = await conversaoGateway.ObterConversaoAsync(id, cancellationToken);
 
-            if (conversao is null)
-            {
-                throw new KeyNotFoundException("Conversão não encontrada");
-            }
+            return conversao is null
+                ? throw new KeyNotFoundException("Conversão não encontrada")
+                : await conversaoGateway.EfetuarConversaoAsync(conversao, cancellationToken);
+        }
 
-            return await conversaoGateway.EfetuarConversaoAsync(conversao, cancellationToken);
+        public async Task<bool> ProcessarDownloadEfetuadoAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var conversao = await conversaoGateway.ObterConversaoAsync(id, cancellationToken);
+
+            return conversao is null
+                ? throw new KeyNotFoundException("Conversão não encontrada")
+                : await conversaoGateway.DownloadEfetuadoAsync(conversao, cancellationToken);
         }
     }
 }

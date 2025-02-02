@@ -1,4 +1,5 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
+using Core.Infra.EmailSender;
 using Core.Infra.S3;
 using Domain.Entities;
 using Domain.ValueObjects;
@@ -7,7 +8,7 @@ using Infra.Dto;
 
 namespace Gateways
 {
-    public class ConversaoGateway(IDynamoDBContext repository, IS3Service s3Service, IVideoHandler videoProcessor, IArquivoHandler fileHandler) : IConversaoGateway
+    public class ConversaoGateway(IDynamoDBContext repository, IS3Service s3Service, IVideoHandler videoHandler, IArquivoHandler arquivoHandler, IEmailService emailService) : IConversaoGateway
     {
         public async Task<Conversao?> ObterConversaoAsync(Guid id, CancellationToken cancellationToken)
         {
@@ -28,14 +29,14 @@ namespace Gateways
 
             try
             {
-                var videoPath = await fileHandler.DownloadVideoAsync(conversao.Id, s3Service.GerarPreSignedUrl(conversao.UrlArquivoVideo));
-                var framesPath = await videoProcessor.ExtrairFramesAsync(conversao.Id, videoPath);
+                var videoPath = await arquivoHandler.DownloadVideoAsync(conversao.Id, s3Service.GerarPreSignedUrl(conversao.UrlArquivoVideo));
+                var framesPath = await videoHandler.ExtrairFramesAsync(conversao.Id, videoPath);
 
                 if (conversao.AlterarStatusParaCompactando(conversao.Status))
                 {
                     await AtualizarStatus(conversao, cancellationToken);
 
-                    var urlArquivoCompactado = await fileHandler.CompactarUploadFramesAsync(conversao.Id, framesPath, videoPath, s3Service);
+                    var urlArquivoCompactado = await arquivoHandler.CompactarUploadFramesAsync(conversao.Id, framesPath, videoPath, s3Service);
 
                     if (!string.IsNullOrEmpty(urlArquivoCompactado))
                     {
@@ -43,6 +44,8 @@ namespace Gateways
                         conversao.SetUrlArquivoCompactado(urlArquivoCompactado);
 
                         await AtualizarStatus(conversao, cancellationToken);
+
+                        await emailService.SendEmailAsync(conversao.EmailUsuario, "Conversão realizada com sucesso", $"Olá, a conversão do seu vídeo foi realizada com sucesso! Acesse o Framepack para realizar o donwload. Informe o Id: {conversao.Id} para download.");
                         return true;
                     }
                 }
@@ -55,19 +58,35 @@ namespace Gateways
             }
             finally
             {
-                await fileHandler.LimpezaAsync(conversao.Id, conversao.UrlArquivoVideo, s3Service);
+                await arquivoHandler.LimpezaAsync(conversao.Id, conversao.UrlArquivoVideo, s3Service);
             }
 
             return false;
         }
 
-        private async Task AtualizarStatus(Conversao conversao, CancellationToken cancellationToken) => 
+        public async Task<bool> DownloadEfetuadoAsync(Conversao conversao, CancellationToken cancellationToken)
+        {
+            if (await arquivoHandler.ExcluiArquivoAposDownloadAsync(conversao.Id, conversao.UrlArquivoCompactado, s3Service))
+            {
+                conversao.AlterarStatusParaDownloadEfetuado();
+
+                await AtualizarStatus(conversao, cancellationToken);
+
+                return true;
+            }
+
+            return false;
+        }
+
+
+        private async Task AtualizarStatus(Conversao conversao, CancellationToken cancellationToken) =>
             await repository.SaveAsync(EntityToDb(conversao), cancellationToken);
 
         private static Conversao MapConversao(ConversaoDb db)
         {
             var conversao = new Conversao(db.Id, db.UsuarioId, db.Data, Enum.Parse<Status>(db.Status), db.NomeArquivo, db.UrlArquivoVideo);
             conversao.SetUrlArquivoCompactado(db.UrlArquivoCompactado);
+            conversao.SetEmailUsuario(db.EmailUsuario);
 
             return conversao;
         }

@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framepack.Worker.Tets", "te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmokeTests", "tests\SmokeTests\SmokeTests.csproj", "{13076610-A93D-46BA-9003-6AE878B0BA22}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Infra.EmailSender", "src\BuildingBlocks\Core.Infra.EmailSender\Core.Infra.EmailSender.csproj", "{CAEF467C-2BE9-4637-9635-37C2687D3C25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{13076610-A93D-46BA-9003-6AE878B0BA22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13076610-A93D-46BA-9003-6AE878B0BA22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13076610-A93D-46BA-9003-6AE878B0BA22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAEF467C-2BE9-4637-9635-37C2687D3C25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAEF467C-2BE9-4637-9635-37C2687D3C25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAEF467C-2BE9-4637-9635-37C2687D3C25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAEF467C-2BE9-4637-9635-37C2687D3C25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -113,6 +119,7 @@ Global
 		{7A9D65C9-8880-4B17-B692-2F6590181BC5} = {E3EB5925-B376-4DE3-95EE-C133F62D64EE}
 		{BA303C47-AEEB-4546-A841-30F84A2CBBF7} = {7E03BDC4-16CC-4A94-B250-DA66844FC464}
 		{13076610-A93D-46BA-9003-6AE878B0BA22} = {7E03BDC4-16CC-4A94-B250-DA66844FC464}
+		{CAEF467C-2BE9-4637-9635-37C2687D3C25} = {E3EB5925-B376-4DE3-95EE-C133F62D64EE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BF2850-C133-4E13-BCCB-00593A37326B}
