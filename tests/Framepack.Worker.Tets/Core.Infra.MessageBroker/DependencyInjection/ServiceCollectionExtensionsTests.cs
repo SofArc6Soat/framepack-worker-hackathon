@@ -1,39 +1,40 @@
 ﻿using Amazon.Extensions.NETCore.Setup;
 using Amazon.SQS;
-using Core.Infra.MessageBroker.DependencyInjection; 
+using Core.Infra.MessageBroker.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Framepack.Worker.Tets.Core.Infra.MessageBroker.DependencyInjection;
-
-public class ServiceCollectionExtensionsTests
+namespace Framepack.Worker.Tets.Core.Infra.MessageBroker.DependencyInjection
 {
-    [Fact]
-    public void AddAwsSqsMessageBroker_ShouldAddAwsOptionsAndSqsService()
+    public class ServiceCollectionExtensionsTests
     {
-        // Arrange
-        var services = new ServiceCollection();
+        [Fact]
+        public void AddAwsSqsMessageBroker_ShouldAddAwsOptionsAndSqsService()
+        {
+            // Arrange
+            var services = new ServiceCollection();
 
-        // Act
-        services.AddAwsSqsMessageBroker();
-        var serviceProvider = services.BuildServiceProvider();
+            // Act
+            services.AddAwsSqsMessageBroker();
+            var serviceProvider = services.BuildServiceProvider();
 
-        // Assert
-        var awsOptions = serviceProvider.GetService<AWSOptions>();
-        Assert.NotNull(awsOptions);
-        Assert.Equal("default", awsOptions.Profile);
-        Assert.Equal(Amazon.RegionEndpoint.USEast1, awsOptions.Region);
+            // Assert
+            var awsOptions = serviceProvider.GetService<AWSOptions>();
+            Assert.NotNull(awsOptions);
+            Assert.Equal("default", awsOptions.Profile);
+            Assert.Equal(Amazon.RegionEndpoint.USEast1, awsOptions.Region);
 
-        var sqsService = serviceProvider.GetService<IAmazonSQS>();
-        Assert.NotNull(sqsService);
-    }
+            var sqsService = serviceProvider.GetService<IAmazonSQS>();
+            Assert.NotNull(sqsService);
+        }
 
-    [Fact]
-    public void AddAwsSqsMessageBroker_ShouldThrowException_WhenServiceCollectionIsNull()
-    {
-        // Arrange
-        IServiceCollection services = null;
+        [Fact]
+        public void AddAwsSqsMessageBroker_ShouldThrowException_WhenServiceCollectionIsNull()
+        {
+            // Arrange
+            IServiceCollection services = null;
 
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => services.AddAwsSqsMessageBroker());
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => services.AddAwsSqsMessageBroker());
+        }
     }
 }

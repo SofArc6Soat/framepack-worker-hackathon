@@ -6,6 +6,7 @@ namespace Domain.Entities
     public class Conversao : Entity, IAggregateRoot
     {
         public string UsuarioId { get; private set; }
+        public string EmailUsuario { get; private set; } = string.Empty;
         public DateTime Data { get; private set; }
         public Status Status { get; private set; }
         public string NomeArquivo { get; private set; }
@@ -61,5 +62,8 @@ namespace Domain.Entities
 
         public void AlterarStatusParaErro() =>
             Status = Status.Erro;
+
+        public void AlterarStatusParaDownloadEfetuado() =>
+            Status = Status.DownloadEfetuado;
     }
 }

@@ -35,11 +35,11 @@ public class BaseUseCaseTests
     public void Notificar_DeveChamarHandleComErrosDeValidacao()
     {
         // Arrange
-        var validationResult = new ValidationResult(new List<ValidationFailure>
-        {
+        var validationResult = new ValidationResult(
+        [
             new ValidationFailure("Propriedade", "Erro de validação 1"),
             new ValidationFailure("Propriedade", "Erro de validação 2")
-        });
+        ]);
 
         // Act
         _baseUseCase.ChamarNotificar(validationResult);
@@ -115,10 +115,7 @@ public class BaseUseCaseTests
 
         public void ChamarNotificar(ValidationResult validationResult) => Notificar(validationResult);
 
-        public bool ChamarExecutarValidacao<TV, TE>(TV validacao, TE entidade) where TV : AbstractValidator<TE> where TE : Entity
-        {
-            return ExecutarValidacao(validacao, entidade);
-        }
+        public bool ChamarExecutarValidacao<TV, TE>(TV validacao, TE entidade) where TV : AbstractValidator<TE> where TE : Entity => ExecutarValidacao(validacao, entidade);
     }
 
     private class TestEntity : Entity
@@ -128,9 +125,6 @@ public class BaseUseCaseTests
 
     private class TestEntityValidator : AbstractValidator<TestEntity>
     {
-        public TestEntityValidator()
-        {
-            RuleFor(e => e.Nome).NotEmpty().WithMessage("Nome é obrigatório");
-        }
+        public TestEntityValidator() => RuleFor(e => e.Nome).NotEmpty().WithMessage("Nome é obrigatório");
     }
 }

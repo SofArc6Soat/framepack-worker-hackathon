@@ -36,17 +36,18 @@ namespace Worker
 
             services.AddControllerDependencyServices();
 
-            // TODO: Evento que produzirá
             var queues = new Queues
             {
-                QueueConversaoSolicitadaEvent = settings.AwsSqsSettings.QueueConversaoSolicitadaEvent
+                QueueConversaoSolicitadaEvent = settings.AwsSqsSettings.QueueConversaoSolicitadaEvent,
+                QueueDownloadEfetuadoEvent = settings.AwsSqsSettings.QueueDownloadEfetuadoEvent
             };
 
             services.AddGatewayDependencyServices(settings.AwsDynamoDbSettings.ServiceUrl, settings.AwsDynamoDbSettings.AccessKey, settings.AwsDynamoDbSettings.SecretKey, queues);
 
             var workerQueues = new WorkerQueues
             {
-                QueueConversaoSolicitadaEvent = settings.AwsSqsSettings.QueueConversaoSolicitadaEvent
+                QueueConversaoSolicitadaEvent = settings.AwsSqsSettings.QueueConversaoSolicitadaEvent,
+                QueueDownloadEfetuadoEvent = settings.AwsSqsSettings.QueueDownloadEfetuadoEvent
             };
 
             services.AddWorkerDependencyServices(workerQueues);

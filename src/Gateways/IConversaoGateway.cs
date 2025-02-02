@@ -7,5 +7,6 @@ namespace Gateways
         Task<Conversao?> ObterConversaoAsync(Guid id, CancellationToken cancellationToken);
 
         Task<bool> EfetuarConversaoAsync(Conversao conversao, CancellationToken cancellationToken);
+        Task<bool> DownloadEfetuadoAsync(Conversao conversao, CancellationToken cancellationToken);
     }
 }

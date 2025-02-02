@@ -140,9 +140,7 @@ public class ConversaoTests
         Assert.Equal(urlArquivoCompactado, conversao.UrlArquivoCompactado);
     }
 
-    private Conversao CriarConversao(Status status)
-    {
-        return new Conversao(
+    private Conversao CriarConversao(Status status) => new(
             Guid.NewGuid(),
             "usuario123",
             DateTime.Now,
@@ -150,5 +148,4 @@ public class ConversaoTests
             "video.mp4",
             "http://example.com/video.mp4"
         );
-    }
 }
