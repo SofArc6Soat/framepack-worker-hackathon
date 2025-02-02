@@ -175,4 +175,4 @@ jobs:
 
       - name: Build and Push Docker Image
         id: build-docker-image
-        run: docker buildx build --push -t sofarc6soat/framepack-worker:latest -f ./src/Api/Dockerfile.publish .
+        run: docker buildx build --push -t sofarc6soat/framepack-worker:latest -f ./src/Worker/Dockerfile.publish .
