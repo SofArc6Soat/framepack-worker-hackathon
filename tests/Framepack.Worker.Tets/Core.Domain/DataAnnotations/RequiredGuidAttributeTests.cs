@@ -6,10 +6,7 @@ public class RequiredGuidAttributeTests
 {
     private readonly RequiredGuidAttribute _attribute;
 
-    public RequiredGuidAttributeTests()
-    {
-        _attribute = new RequiredGuidAttribute();
-    }
+    public RequiredGuidAttributeTests() => _attribute = new RequiredGuidAttribute();
 
     [Fact]
     public void IsValid_WithValidGuid_ReturnsTrue()

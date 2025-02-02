@@ -1,25 +1,34 @@
 ﻿using Core.Domain.Entities;
 
-namespace Gateways.Dtos.Events;
-
-public record ConversaoSolicitadaEvent : Event
+namespace Gateways.Dtos.Events
 {
-    private DateTime _data;
-
-    public string UsuarioId { get; set; } = string.Empty;
-    public DateTime Data
+    public record ConversaoSolicitadaEvent : Event
     {
-        get => _data;
-        set
+        private DateTime _data;
+
+        public string UsuarioId { get; set; } = string.Empty;
+
+        public string EmailUsuario { get; set; } = string.Empty;
+
+        public DateTime Data
         {
-            if (value == DateTime.MinValue)
+            get => _data;
+            set
             {
-                throw new ArgumentOutOfRangeException(nameof(Data), "Data não pode ser DateTime.MinValue");
+                if (value == DateTime.MinValue)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(Data), "Data não pode ser DateTime.MinValue");
+                }
+                _data = value;
             }
-            _data = value;
         }
+        public string Status { get; set; } = string.Empty;
+        public string NomeArquivo { get; set; } = string.Empty;
+        public string UrlArquivoVideo { get; set; } = string.Empty;
     }
-    public string Status { get; set; } = string.Empty;
-    public string NomeArquivo { get; set; } = string.Empty;
-    public string UrlArquivoVideo { get; set; } = string.Empty;
+
+    public record DownloadEfetuadoEvent : Event
+    {
+        public string UrlArquivoVideo { get; set; } = string.Empty;
+    }
 }

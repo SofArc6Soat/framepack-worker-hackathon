@@ -6,6 +6,7 @@
         Processando,
         Compactando,
         Concluido,
-        Erro
+        Erro,
+        DownloadEfetuado
     }
 }
