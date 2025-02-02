@@ -34,9 +34,13 @@
 
  ## Estrutura do Projeto
 
- - **Gateways**: Contém os handlers responsáveis pelo processamento de vídeos.
  - **BuildingBlocks**: Contém serviços e utilitários comuns, como o serviço de integração com o S3.
+ - **Controllers**: Contém os controladores responsáveis por lidar com as requisições HTTP.
+ - **DevOps**: Contém scripts e configurações para Docker e Kubernetes.
+ - **Gateways**: Contém os handlers responsáveis pelo processamento de vídeos.
+ - **Infra**: Contém a infraestrutura necessária para o funcionamento do projeto, como configurações de banco de dados e serviços externos.
  - **UseCases**: Contém os casos de uso principais do worker.
+ - **Worker**: Contém a lógica principal do worker para download de vídeos, extração de frames, compactação e upload.
 
  ## Tecnologias Utilizadas
 
