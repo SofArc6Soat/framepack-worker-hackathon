@@ -59,6 +59,3 @@ USER userapp
 
 # Garantir que dotnet-ef está no PATH para o usuário não-root
 ENV PATH="$PATH:/tools"
-
-# Definir o ponto de entrada para aplicar migrações e iniciar o aplicativo
-ENTRYPOINT ["sh", "-c", "dotnet ef database update --project /src/Infra/Infra.csproj && dotnet Api.dll"]
