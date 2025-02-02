@@ -1,4 +1,5 @@
 ﻿using Amazon.SQS;
+using Core.Infra.EmailSender.DependencyInjection;
 using Core.Infra.MessageBroker;
 using Core.Infra.S3.DependencyInjection;
 using Gateways.Dtos.Events;
@@ -14,6 +15,8 @@ namespace Gateways.DependencyInjection
     {
         public static void AddGatewayDependencyServices(this IServiceCollection services, string dynamoDbServiceUrl, string dynamoDbAccessKey, string dynamoDbSecretKey, Queues queues)
         {
+            services.AddEmailSender();
+
             services.AddHttpClient();
 
             services.AddScoped<IConversaoGateway, ConversaoGateway>();

@@ -27,6 +27,9 @@ namespace Domain.Entities
         public void SetUrlArquivoCompactado(string urlArquivoCompactado) =>
             UrlArquivoCompactado = urlArquivoCompactado;
 
+        public void SetEmailUsuario(string emailUsuario) =>
+            EmailUsuario = emailUsuario;
+
         public bool AlterarStatusParaProcessando(Status statusAtual)
         {
             if (statusAtual == Status.AguardandoConversao)

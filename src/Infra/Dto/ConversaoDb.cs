@@ -12,6 +12,9 @@ namespace Infra.Dto
         public string UsuarioId { get; set; } = string.Empty;
 
         [DynamoDBProperty]
+        public string EmailUsuario { get; set; } = string.Empty;
+
+        [DynamoDBProperty]
         public string Status { get; set; } = string.Empty;
 
         [DynamoDBProperty]
