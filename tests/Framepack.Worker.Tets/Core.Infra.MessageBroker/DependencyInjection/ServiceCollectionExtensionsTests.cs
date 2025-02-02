@@ -1,5 +1,4 @@
 ﻿using Amazon.CognitoIdentityProvider;
-using Amazon.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
@@ -12,21 +11,11 @@ public class ServiceCollectionExtensionsTests
     {
         // Arrange
         var services = new ServiceCollection();
-        var mockCredentials = new Mock<AWSCredentials>();
-        var regionEndpoint = Amazon.RegionEndpoint.USEast1; // Defina a região apropriada
+        var mockCognitoClient = new Mock<IAmazonCognitoIdentityProvider>();
 
-        services.AddSingleton<IAmazonCognitoIdentityProvider>(sp =>
-        {
-            var config = new AmazonCognitoIdentityProviderConfig
-            {
-                RegionEndpoint = regionEndpoint
-            };
-            return new AmazonCognitoIdentityProviderClient(mockCredentials.Object, config);
-        });
+        services.AddSingleton(mockCognitoClient.Object);
 
         // Act
-        // Chame o método que você está testando, por exemplo:
-        // services.AddApiDefautConfig();
 
         // Assert
         var serviceProvider = services.BuildServiceProvider();
