@@ -99,7 +99,7 @@ jobs:
         run: |
           # Iniciar o scanner do SonarCloud
           dotnet-sonarscanner begin \
-            /k:"SofArc6Soat_framepack-api-hackathon" \
+            /k:"SofArc6Soat_framepack-worker-hackathon" \
             /o:"sofarc6soat" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
