@@ -1,4 +1,5 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
+using Core.Infra.EmailSender;
 using Core.Infra.S3;
 using Domain.Entities;
 using Domain.ValueObjects;
@@ -7,7 +8,7 @@ using Infra.Dto;
 
 namespace Gateways
 {
-    public class ConversaoGateway(IDynamoDBContext repository, IS3Service s3Service, IVideoHandler videoHandler, IArquivoHandler arquivoHandler) : IConversaoGateway
+    public class ConversaoGateway(IDynamoDBContext repository, IS3Service s3Service, IVideoHandler videoHandler, IArquivoHandler arquivoHandler, IEmailService emailService) : IConversaoGateway
     {
         public async Task<Conversao?> ObterConversaoAsync(Guid id, CancellationToken cancellationToken)
         {
@@ -43,6 +44,8 @@ namespace Gateways
                         conversao.SetUrlArquivoCompactado(urlArquivoCompactado);
 
                         await AtualizarStatus(conversao, cancellationToken);
+
+                        await emailService.SendEmailAsync(conversao.EmailUsuario, "Conversão realizada com sucesso", $"Olá, a conversão do seu vídeo foi realizada com sucesso! Acesse o Framepack para realizar o donwload. Informe o Id: {conversao.Id} para download.");
                         return true;
                     }
                 }
@@ -83,6 +86,7 @@ namespace Gateways
         {
             var conversao = new Conversao(db.Id, db.UsuarioId, db.Data, Enum.Parse<Status>(db.Status), db.NomeArquivo, db.UrlArquivoVideo);
             conversao.SetUrlArquivoCompactado(db.UrlArquivoCompactado);
+            conversao.SetEmailUsuario(db.EmailUsuario);
 
             return conversao;
         }

@@ -51,6 +51,7 @@ namespace Worker
             };
 
             services.AddWorkerDependencyServices(workerQueues);
+
         }
 
         public static void Configure(IApplicationBuilder app) =>

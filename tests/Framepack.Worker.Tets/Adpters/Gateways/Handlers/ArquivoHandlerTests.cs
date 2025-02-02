@@ -2,8 +2,6 @@
 using Gateways.Handlers;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Moq.Protected;
-using System.Net;
 
 namespace Framepack.Worker.Tets.Adpters.Gateways.Handlers;
 
