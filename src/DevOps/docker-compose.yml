@@ -1,57 +1,45 @@
-version: '3.8'
+version: '3.9'
 
 services:
   dynamodb-local:
     command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
     image: "amazon/dynamodb-local:latest"
     container_name: dynamodb-local
+    user: root
     ports:
       - "8000:8000"
     volumes:
       - "./docker/dynamodb:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
 
-#   quickfood-backend:
-#     build:
-#       context: ../../src
-#       dockerfile: ./Api/Dockerfile
-#     restart: always
-#     image: quickfood-backend
-#     container_name: quickfood-backend
-#     depends_on:
-#       quickfood-sqlserver:
-#         condition: service_healthy
-#     ports:
-#       - 5000:80
-#       - 5001:443
-#     environment:
-#       - ASPNETCORE_ENVIRONMENT=Production
-#       - ASPNETCORE_URLS=https://+:443;http://+:80
-#       - ASPNETCORE_HTTPS_PORTS=443
-#       - ASPNETCORE_HTTP_PORTS=80
-#       - ASPNETCORE_Kestrel__Certificates__Default__Password=quickfood
-#       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/quickfood-certificate.pfx
-#       - ConnectionStrings__DefaultConnection=Server=quickfood-sqlserver;Database=QuickFood;User Id=sa;Password=quickfood-backend#2024;Encrypt=False;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False;
-#       - CognitoSettings__ClientId=7gm6dtb4el84459oc4077j0ntt
-#       - CognitoSettings__ClientSecret=174srm2o3dn5ibudq4fdi5s7mdp09h5kua7tdq7c60rok4nvm72k
-#       - CognitoSettings__UserPoolId=us-east-1_4CETh5AA5
-#       - CognitoSettings__Authority=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_4CETh5AA5
-#       - CognitoSettings__MetadataAddress=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_4CETh5AA5/.well-known/openid-configuration
-#     volumes:
-#       - ./certs:/https:ro
-#     networks:
-#       - quickfood_network
+  dynamodb-local-setup:
+    container_name: dynamodb-local-setup
+    image: amazon/aws-cli
+    volumes:
+      - "./tests/schemas:/tmp/dynamo"
+    env_file:
+      - ../kubernetes/.env
 
-# networks:
-#   quickfood_network:
-#     driver: bridge
-#     ipam:
-#       driver: default
-#       config:
-#         - subnet: 172.172.0.0/16
-#           gateway: 172.172.0.1
+  framepack-worker:
+    build:
+      context: ../../src
+      dockerfile: ./Worker/Dockerfile
+    restart: always
+    image: framepack-worker
+    container_name: framepack-worker
+    ports:
+      - 8080:80
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - framepack-worker-network
 
-# volumes:
-#   sql_data: {}
-#   sql_logs: {}
-#   sql_secrets: {}
+networks:
+  framepack-worker-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.173.0.0/16
+          gateway: 172.173.0.1

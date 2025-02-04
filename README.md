@@ -1,14 +1,12 @@
- - [Aplicação Framepack-WebApi (backend)](#aplicação-framepack-webapi)
+- [Aplicação Framepack-Worker](#aplicação-framepack-worker)
    - [Funcionalidades Principais](#funcionalidades-principais)
    - [Estrutura do Projeto](#estrutura-do-projeto)
    - [Tecnologias Utilizadas](#tecnologias-utilizadas)
    - [Serviços Utilizados](#serviços-utilizados)
-   - [Motivações para Utilizar o SQL Server como Banco de Dados da Aplicação](#motivações-para-utilizar-o-sql-server-como-banco-de-dados-da-aplicação)
    - [Como Executar o Projeto](#como-executar-o-projeto)
      - [Clonar o repositório](#clonar-o-repositório)
      - [Executar com docker-compose](#executar-com-docker-compose)
      - [Executar com Kubernetes](#executar-com-kubernetes)
-   - [Collection com todas as APIs com exemplos de requisição](#collection-com-todas-as-apis-com-exemplos-de-requisição)
    - [Desenho da arquitetura](#desenho-da-arquitetura)
    - [Demonstração em vídeo](#demonstração-em-vídeo)
    - [Relatório de Cobertura](#relatório-de-cobertura)
@@ -44,70 +42,130 @@
 
  ## Tecnologias Utilizadas
 
- - .NET 8
- - Amazon S3
- - Docker
- - Kubernetes
+- **.NET 8**: Framework principal para desenvolvimento do backend. <br>
+- **Docker**: Containerização da aplicação para garantir portabilidade e facilitar o deploy. <br>
+- **Kubernetes**: Orquestração dos container visando resiliência da aplicação <br>
+- **Banco de Dados**: Utilização do SQL Server para armazenamento de informações. <br>
 
- ## Como Executar o Projeto
+---
 
- ### Clonar o repositório
- ```
- git clone https://github.com/SofArc6Soat/framepack-worker-hackathon.git
- ```
+## Como Executar o Projeto (Framepack-Worker)
 
- ### Executar com docker-compose
- 1. Docker (docker-compose)
- 1.1. Navegue até o diretório do projeto:
- ```
- cd framepack-worker-hackathon\src\DevOps
- ```
- 2. Configure o ambiente Docker:
- ```
- docker-compose up --build
- ```
- 2.1. A aplicação estará disponível em http://localhost:5001
+### Clonar o repositório
+  ```
+  git clone https://github.com/SofArc6Soat/framepack-worker-hackathon.git
+  ```
 
- ### Executar com Kubernetes
- 2. Kubernetes
- 2.1. Navegue até o diretório do projeto:
- ```
- cd framepack-worker-hackathon\src\DevOps\kubernetes
- ```
- 2.2. Configure o ambiente Docker:
- ```
- kubectl apply -f 06-framepack-worker-deployment.yaml
- kubectl apply -f 07-framepack-worker-service.yaml
- kubectl apply -f 08-framepack-worker-hpa.yaml
- kubectl port-forward svc/framepack-worker 8080:80
- ```
- ou executar todos scripts via PowerShell
- ```
- Get-ExecutionPolicy
- Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
- .\delete-k8s-resources.ps1
- .\apply-k8s-resources.ps1
- ```
- 2.3. A aplicação estará disponível em http://localhost:8080
+### Executar com docker-compose
+#### Docker (docker-compose)
+- **Navegue até o diretório do projeto:**
+  ```
+  cd framepack-worker-hackathon\src\DevOps
+  ```
+- **Configure o ambiente Docker:**
+  ```
+  docker-compose up --build
+  ```
+- **A aplicação estará disponível em:** http://localhost:5001
+- **URL do Swagger:** http://localhost:5001/swagger
+- **URL do Healthcheck da API:** http://localhost:5001/health
 
- ## Autores
+### Executar com Kubernetes
+#### Kubernetes
 
- - **Anderson Lopez de Andrade RM: 350452** <br>
- - **Henrique Alonso Vicente RM: 354583**<br>
+Para executar o projeto com Kubernetes, siga os passos abaixo:
 
- ## Documentação Adicional
+- **Crie um arquivo `.env`** no diretório (`framepack-worker-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
 
- - **Miro - Domain Storytelling, Context Map, Linguagem Ubíqua e Event Storming**: [Link para o Event Storming](https://miro.com/app/board/uXjVKST91sw=/)
- - **Github - Domain Storytelling**: [Link para o Domain Storytelling](https://github.com/SofArc6Soat/quickfood-domain-story-telling)
- - **Github - Context Map**: [Link para o Domain Storytelling](https://github.com/SofArc6Soat/quickfood-ubiquitous-language)
- - **Github - Linguagem Ubíqua**: [Link para o Domain Storytelling](https://github.com/SofArc6Soat/quickfood-ubiquitous-language)
+  ```plaintext
+  AWS_ACCESS_KEY_ID=your_access_key_id
+  AWS_SECRET_ACCESS_KEY=your_secret_access_key
+  AWS_REGION=your_region
+  ```
 
- ## Repositórios microserviços
+- **Navegue até o diretório do projeto**:
+  ```
+  cd framepack-worker-hackathon\src\DevOps\kubernetes
+  ```
+  
+- **Crie um Secret no Kubernetes** a partir do arquivo [.env]:
+  ```sh
+  kubectl create secret generic aws-secret --from-env-file=framepack-worker-hackathon/.env
+  ```
 
- - **Framepack-WebApi**: [Link](https://github.com/SofArc6Soat/framepack-api-hackathon)
- - **Framepack-Worker**: [Link](https://github.com/SofArc6Soat/framepack-worker-hackathon)
+- **Aplique os arquivos YAML** para configurar os recursos do Kubernetes:
+  ```sh
+  kubectl apply -f 01-framepack-worker-deployment.yaml
+  kubectl apply -f 02-framepack-worker-service.yaml
+  kubectl apply -f 03-framepack-worker-hpa.yaml
+  ```
 
- ## Repositórios diversos
+- **Aguarde até que os pods da API e do Worker estejam em execução**:
+  ```sh
+  kubectl get pods -l app=framepack-worker
+  ```
 
- - **Documentação**: [Link](https://github.com/SofArc6Soat/framepack-api)
- - **Lambda Autenticação**: [Link](https://github.com/SofArc6Soat/quickfood-auth-function)
+- **Configure o port-forwarding** para os serviços da API e do Worker:
+  ```sh
+  kubectl port-forward svc/framepack-worker-service 8080:80
+  ```
+
+### Usando o Script PowerShell
+
+Se preferir, você pode executar o script PowerShell que automatiza todos os passos acima:
+
+- **Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-worker-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
+
+  ```plaintext
+  AWS_ACCESS_KEY_ID=your_access_key_id
+  AWS_SECRET_ACCESS_KEY=your_secret_access_key
+  AWS_REGION=your_region
+  ```
+- **Execute o script PowerShell** para criar o Secret e aplicar os recursos do Kubernetes:
+
+  ```powershell
+  Get-ExecutionPolicy
+  Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+  .\delete-k8s-resources.ps1
+  .\apply-k8s-resources.ps1
+  ```
+Este script irá:
+
+- Criar um Secret no Kubernetes a partir do arquivo [.env].
+- Aplicar todos os arquivos YAML necessários para configurar os recursos do Kubernetes.
+- Aguardar até que os pods da API e do Worker estejam em execução.
+- Configurar o port-forwarding para os serviços da API e do Worker.
+
+**Certifique-se de ter o `kubectl` instalado e configurado corretamente em sua máquina antes de executar o script.**
+
+---
+
+## Desenho da arquitetura
+Para visualizar o desenho da arquitetura abra o arquivo "Arquitetura-Infra.drawio.png" e "Arquitetura-Macro.drawio.png" no diretório "arquitetura" ou importe o arquivo "Arquitetura.drawio" no Draw.io (https://app.diagrams.net/).
+
+## Demonstração em vídeo
+Para visualizar a demonstração da aplicação da Fase Hackathon:
+- Atualizações efetuadas na arquitetura e funcionamento da aplicação - Link do Vimeo: 
+- Processo de deploy e execução das pipelines - Link do Vimeo: 
+
+## Autores
+
+- **Anderson Lopez de Andrade RM: 350452** <br>
+- **Henrique Alonso Vicente RM: 354583**<br>
+
+## Documentação Adicional
+
+- **Miro - Domain Storytelling, Context Map, Linguagem Ubíqua e Event Storming**: [Link para o Event Storming](https://miro.com/app/board/uXjVKST91sw=/)
+- **Github - Domain Storytelling**: [Link para o Domain Storytelling](https://github.com/SofArc6Soat/quickfood-domain-story-telling)
+- **Github - Context Map**: [Link para o Domain Storytelling](https://github.com/SofArc6Soat/quickfood-ubiquitous-language)
+- **Github - Linguagem Ubíqua**: [Link para o Domain Storytelling](https://github.com/SofArc6Soat/quickfood-ubiquitous-language)
+
+## Repositórios microserviços
+
+- **Framepack-WebApi**: [Link](https://github.com/SofArc6Soat/framepack-api-hackathon)
+- **Framepack-Worker**: [Link](https://github.com/SofArc6Soat/framepack-worker-hackathon)
+
+## Repositórios diversos
+
+- **Documentação**: [Link](https://github.com/SofArc6Soat/framepack-api)
+- **Lambda Autenticação**: [Link](https://github.com/SofArc6Soat/quickfood-auth-function)
