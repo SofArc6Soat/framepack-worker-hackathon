@@ -23,7 +23,7 @@ namespace Worker.BackgroundServices
             }
         }
 
-        private async Task ProcessMessageAsync(ConversaoSolicitadaEvent? message, CancellationToken cancellationToken)
+        public async Task ProcessMessageAsync(ConversaoSolicitadaEvent? message, CancellationToken cancellationToken)
         {
             if (message is not null)
             {

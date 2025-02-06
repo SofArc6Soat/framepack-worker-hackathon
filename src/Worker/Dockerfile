@@ -6,16 +6,16 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0.404-bookworm-slim AS build
 WORKDIR /src
-COPY ["src/Api/Api.csproj", "Api/"]
-RUN dotnet restore "Api/Api.csproj"
+COPY . .
+RUN dotnet restore "Worker/Worker.csproj"
 COPY . .
 WORKDIR /src
-RUN dotnet build "Api/Api.csproj" -c Release -o /app/build
+RUN dotnet build "Worker/Worker.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Api/Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Worker/Worker.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Api.dll"]
+ENTRYPOINT ["dotnet", "Worker.dll"]

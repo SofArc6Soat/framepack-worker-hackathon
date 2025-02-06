@@ -17,6 +17,7 @@ namespace Core.Infra.S3
             {
                 using var memoryStream = new MemoryStream();
                 await arquivo.CopyToAsync(memoryStream);
+                memoryStream.Position = 0; // Reiniciar a posição do stream
 
                 var uploadRequest = new TransferUtilityUploadRequest
                 {
