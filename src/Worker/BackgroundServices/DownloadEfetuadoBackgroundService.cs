@@ -23,7 +23,7 @@ namespace Worker.BackgroundServices
             }
         }
 
-        private async Task ProcessMessageAsync(DownloadEfetuadoEvent? message, CancellationToken cancellationToken)
+        public async Task ProcessMessageAsync(DownloadEfetuadoEvent? message, CancellationToken cancellationToken)
         {
             if (message is not null)
             {
