@@ -7,102 +7,105 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Core.WebApi.DependencyInjection;
-
-public static class ServiceCollectionExtensions
+namespace Core.WebApi.DependencyInjection
 {
-    public static void AddApiDefautConfig(this IServiceCollection services, JwtBearerConfigureOptions jwtBearerConfigureOptions)
+    [ExcludeFromCodeCoverage]
+    public static class ServiceCollectionExtensions
     {
-        services.AddScoped<INotificador, Notificador>();
-
-        services.AddControllers().AddJsonOptions(delegate (JsonOptions options)
+        public static void AddApiDefautConfig(this IServiceCollection services, JwtBearerConfigureOptions jwtBearerConfigureOptions)
         {
-            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            services.AddScoped<INotificador, Notificador>();
 
-            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-
-        });
-
-        services.AddSwaggerConfig();
-
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(opt =>
+            services.AddControllers().AddJsonOptions(delegate (JsonOptions options)
             {
-                opt.Authority = jwtBearerConfigureOptions.Authority;
-                opt.MetadataAddress = jwtBearerConfigureOptions.MetadataAddress;
-                opt.IncludeErrorDetails = true;
-                opt.RequireHttpsMetadata = false;
-                opt.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = false,
-                    ValidateIssuerSigningKey = true,
-                    RoleClaimType = "cognito:groups"
-                };
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
             });
 
-        services.AddAuthorizationBuilder()
-            // Política para usuários no grupo "admin"
-            .AddPolicy("AdminRole", policy => policy.RequireRole("admin"))
-            // Política para usuários no grupo "cliente"
-            .AddPolicy("ClienteRole", policy => policy.RequireRole("cliente"))
-            // Política para usuários que pertencem a "admin" ou "cliente"
-            .AddPolicy("AdminOrClienteRole", policy => policy.RequireRole("admin", "cliente"));
+            services.AddSwaggerConfig();
 
-        services.AddAWSService<IAmazonCognitoIdentityProvider>();
-    }
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.Authority = jwtBearerConfigureOptions.Authority;
+                    opt.MetadataAddress = jwtBearerConfigureOptions.MetadataAddress;
+                    opt.IncludeErrorDetails = true;
+                    opt.RequireHttpsMetadata = false;
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = false,
+                        ValidateIssuerSigningKey = true,
+                        RoleClaimType = "cognito:groups"
+                    };
+                });
 
-    public static void AddWorkerDefautConfig(this IServiceCollection services)
-    {
-        services.AddScoped<INotificador, Notificador>();
+            services.AddAuthorizationBuilder()
+                // Política para usuários no grupo "admin"
+                .AddPolicy("AdminRole", policy => policy.RequireRole("admin"))
+                // Política para usuários no grupo "cliente"
+                .AddPolicy("ClienteRole", policy => policy.RequireRole("cliente"))
+                // Política para usuários que pertencem a "admin" ou "cliente"
+                .AddPolicy("AdminOrClienteRole", policy => policy.RequireRole("admin", "cliente"));
 
-        services.AddControllers().AddJsonOptions(delegate (JsonOptions options)
+            services.AddAWSService<IAmazonCognitoIdentityProvider>();
+        }
+
+        public static void AddWorkerDefautConfig(this IServiceCollection services)
         {
-            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            services.AddScoped<INotificador, Notificador>();
 
-            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            services.AddControllers().AddJsonOptions(delegate (JsonOptions options)
+            {
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 
-        });
-    }
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 
-    public static void UseApiDefautConfig(this IApplicationBuilder app)
-    {
-        app.UseApplicationErrorMiddleware();
+            });
+        }
 
-        app.UseSwaggerConfig();
-
-        app.UseHsts();
-        app.UseHttpsRedirection();
-
-        app.UseRouting();
-
-        app.UseAuthentication();
-
-        app.UseAuthorization();
-
-        app.UseEndpoints(endpoints =>
+        public static void UseApiDefautConfig(this IApplicationBuilder app)
         {
-            endpoints.MapControllers();
-            endpoints.MapHealthChecks("/health");
-        });
-    }
+            app.UseApplicationErrorMiddleware();
 
-    public static void UseWorkerDefautConfig(this IApplicationBuilder app)
-    {
-        app.UseApplicationErrorMiddleware();
+            app.UseSwaggerConfig();
 
-        app.UseHsts();
-        app.UseHttpsRedirection();
+            app.UseHsts();
+            app.UseHttpsRedirection();
 
-        app.UseRouting();
+            app.UseRouting();
 
-        app.UseEndpoints(endpoints =>
+            app.UseAuthentication();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
+            });
+        }
+
+        public static void UseWorkerDefautConfig(this IApplicationBuilder app)
         {
-            endpoints.MapControllers();
-            endpoints.MapHealthChecks("/health");
-        });
+            app.UseApplicationErrorMiddleware();
+
+            app.UseHsts();
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
+            });
+        }
     }
 }
