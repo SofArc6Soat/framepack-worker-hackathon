@@ -1,6 +1,4 @@
-﻿using System;
-using Gateways.Dtos.Events;
-using Xunit;
+﻿using Gateways.Dtos.Events;
 
 namespace Framepack.Worker.Tets.Adpters.Gateways.Dtos.Events;
 
