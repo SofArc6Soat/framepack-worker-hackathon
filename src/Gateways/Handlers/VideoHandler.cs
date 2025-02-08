@@ -1,37 +1,38 @@
 ﻿using Microsoft.Extensions.Logging;
 using Xabe.FFmpeg;
 
-namespace Gateways.Handlers;
-
-public class VideoHandler : IVideoHandler
+namespace Gateways.Handlers
 {
-    private readonly string _ffmpegPath = Path.Combine(AppContext.BaseDirectory, "Configuration/ffmpeg");
-    private readonly ILogger<VideoHandler> logger;
-
-    public VideoHandler(ILogger<VideoHandler> _logger)
+    public class VideoHandler : IVideoHandler
     {
-        logger = _logger;
-        FFmpeg.SetExecutablesPath(_ffmpegPath);
-    }
+        private readonly string _ffmpegPath = Path.Combine(AppContext.BaseDirectory, "Configuration/ffmpeg");
+        private readonly ILogger<VideoHandler> logger;
 
-    public async Task<string> ExtrairFramesAsync(Guid id, string videoPath)
-    {
-        logger.LogInformation("Iniciando - Extração de frames - Id: {Id}", id);
+        public VideoHandler(ILogger<VideoHandler> _logger)
+        {
+            logger = _logger;
+            FFmpeg.SetExecutablesPath(_ffmpegPath);
+        }
 
-        var framesPath = Path.Combine(Path.GetTempPath(), "video-processing", $"{id}");
-        Directory.CreateDirectory(framesPath);
+        public async Task<string> ExtrairFramesAsync(Guid id, string videoPath)
+        {
+            logger.LogInformation("Iniciando - Extração de frames - Id: {Id}", id);
 
-        var mediaInfo = await FFmpeg.GetMediaInfo(videoPath);
+            var framesPath = Path.Combine(Path.GetTempPath(), "video-processing", $"{id}");
+            Directory.CreateDirectory(framesPath);
 
-        _ = mediaInfo.VideoStreams.FirstOrDefault()
-            ?? throw new FileNotFoundException("Nenhum stream de vídeo encontrado.");
+            var mediaInfo = await FFmpeg.GetMediaInfo(videoPath);
 
-        await FFmpeg.Conversions.New()
-            .AddParameter($"-i {videoPath} -vf fps=20 {Path.Combine(framesPath, "frame_%03d.jpg")}")
-            .Start();
+            _ = mediaInfo.VideoStreams.FirstOrDefault()
+                ?? throw new FileNotFoundException("Nenhum stream de vídeo encontrado.");
 
-        logger.LogInformation("Finalizado - Extração de frames - Id: {Id}", id);
+            await FFmpeg.Conversions.New()
+                .AddParameter($"-i {videoPath} -vf fps=20 {Path.Combine(framesPath, "frame_%03d.jpg")}")
+                .Start();
 
-        return framesPath;
+            logger.LogInformation("Finalizado - Extração de frames - Id: {Id}", id);
+
+            return framesPath;
+        }
     }
 }
