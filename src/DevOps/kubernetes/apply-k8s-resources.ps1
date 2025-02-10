@@ -1,8 +1,8 @@
 #
 # Aplicar todos os arquivos YAML
 kubectl apply -f 01-framepack-worker-deployment.yaml
-kubectl apply -f 02-framepack-worker-service.yaml
-kubectl apply -f 03-framepack-worker-hpa.yaml
+kubectl apply -f 02-framepack-worker-hpa.yaml
+kubectl apply -f 03-framepack-worker-service.yaml
 #
 # Função para esperar um pod estar em execução
 function WaitForPod {
@@ -27,12 +27,12 @@ function WaitForPod {
 # Esperar os pods do Worker estarem em execução
 WaitForPod -label "framepack-worker"
 #
-# Obter o nome do pod do Worker
-$podNameWorker = kubectl get pods -l app=framepack-worker -o jsonpath='{.items[0].metadata.name}'
+# Obter o nome do pod do Worker que está em execução
+$podNameWorker = kubectl get pods -l app=framepack-worker -o jsonpath='{.items[?(@.status.phase=="Running")].metadata.name}'
 #
 # Verificar se o pod do Worker está realmente rodando
-$podStatusWorker = kubectl get pods -l app=framepack-worker -o jsonpath='{.items[*].status.phase}' -split ' '
-if ($podStatusWorker -contains 'Running') {
+$podStatusWorker = kubectl get pod $podNameWorker -o jsonpath='{.status.phase}'
+if ($podStatusWorker -eq 'Running') {
     # Verificar o estado do contêiner dentro do pod
     $containerState = kubectl get pod $podNameWorker -o jsonpath='{.status.containerStatuses[0].state}'
     if ($containerState -contains 'running') {
